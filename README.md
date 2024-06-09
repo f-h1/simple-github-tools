@@ -10,6 +10,7 @@ A  collection of scripting friendly commands, written in bash, to manage and mai
 - [Install](#install)
 - [Premiss](#premiss)
 - [Requirements](#requirements)
+- [Bugs](#bugs)
 - [Tools](#tools)
   - [Expected arguments for all commands](#expected-arguments-for-all-commands)
   - [sgt-fnd - Find sgt-related git repositories](#sgt-fnd---find-sgt-related-git-repositories)
@@ -93,6 +94,18 @@ Hi username! You've successfully authenticated, but GitHub does not provide shel
 
 Put the sgt-* files in a directory of your choice and make sure the directory is in your $PATH so you can invoke the scripts anywhere from your shell.
 
+## Bugs
+
+Sometimes get, in often with with `sgt-fnd | sgt-upd` but then not with `sgt-upd` alone.
+
+```
+... already exists on GitHub, updating settings...
+HTTP 422: Validation Failed (...)
+A repository cannot have more than 20 topics.
+```
+Adding a topic file seem to fix it, but script has to check for non-existence of topic file.
+
+Probably it invents topics by some leaking data.
 
 ## Tools
 Here are all commands
