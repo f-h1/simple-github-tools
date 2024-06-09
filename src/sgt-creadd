@@ -1,0 +1,4 @@
+#!/bin/bash
+#Clearing Git Cache: Sometimes Git's internal cache might need to be cleared to properly track files that were previously ignored:
+git rm -r -f --cached .
+git add .

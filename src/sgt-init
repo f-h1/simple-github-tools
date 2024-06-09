@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Script to initialize a .sgt directory and save the repository name in "username/reponame" format
+
+# Create the .sgt directory if it doesn't already exist
+mkdir -p .sgt
+echo "Created or verified the existence of the .sgt directory."
+
+# Prompt the user for their GitHub username
+read -p "Enter your GitHub username: " username
+
+# Prompt the user for the name of the repository
+read -p "Enter the name of the repository: " repo_name
+
+# Format the repository name as "username/reponame"
+formatted_repo_name="${username}/${repo_name}"
+
+# Save the formatted repository name in the .sgt/repo-name file
+echo "$formatted_repo_name" > .sgt/repo-name
+echo "Repository name '$formatted_repo_name' has been saved to .sgt/repo-name."

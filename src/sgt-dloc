@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Function to process a single directory
+process_directory() {
+    local project_path="$1"
+    echo "Processing $project_path"
+    cd "$project_path" || { echo "Failed to enter $project_path"; return; }  # Skip to next if this fails
+
+    # Check if the current directory is a Git repository
+    if git rev-parse --git-dir > /dev/null 2>&1; then
+        echo "This directory is a Git repository. Reinitializing..."
+
+        # Remove all Git history and settings
+        rm -rf .git
+
+        # Reinitialize the repository
+        git init
+
+        # Check for repo-name file and read the new repository name
+        if [ -f .sgt/repo-name ]; then
+            repo_name=$(<.sgt/repo-name)
+            # Add new remote
+            git remote add origin git@github.com:$repo_name.git
+            echo "New remote set to git@github.com:$repo_name.git"
+        else
+            echo "repo-name file not found. Please create one with the new repository's GitHub path."
+            return
+        fi
+    else
+        echo "This is not a Git repository. No changes made."
+    fi
+}
+
+# Check if input is being piped
+if [ ! -t 0 ]; then
+    # Read directories from stdin
+    while IFS= read -r project_path; do
+        process_directory "$project_path"
+    done
+elif [ -n "$1" ]; then
+    # Process the single directory provided as an argument
+    process_directory "$1"
+else
+    # No arguments provided, process the current working directory
+    process_directory "$(pwd)"
+fi

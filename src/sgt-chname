@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# Function to check if the repository name is valid
+function is_valid_repo_name() {
+    local repo_name=$1
+
+    if [[ ! $repo_name =~ ^[a-zA-Z0-9._-]+$ ]]; then
+        return 1
+    fi
+
+    if [ ${#repo_name} -gt 100 ]; then
+        return 1
+    fi
+
+    return 0
+}
+
+# Determine the directory to work on
+project_path="${1:-$(pwd)}"
+
+# Change to the specified directory
+cd "$project_path" || { echo "Failed to enter $project_path"; exit 1; }
+
+# Check if the repo-name file exists in the current directory
+if [ -f .sgt/repo-name ]; then
+    full_repo_name=$(<.sgt/repo-name)
+    full_repo_name=${full_repo_name// /-} # Replace spaces with hyphens
+else
+    echo "No repo-name file found in .sgt/ in $project_path."
+    exit 1
+fi
+
+# Extract GitHub username and current repository name
+github_username=$(echo "$full_repo_name" | cut -d'/' -f1)
+current_repo_name=$(echo "$full_repo_name" | cut -d'/' -f2)
+
+# Prompt the user for a new repository name
+read -p "Enter the new repository name: " new_repo_name
+new_repo_name=${new_repo_name// /-} # Replace spaces with hyphens
+
+# Validate the new repository name
+if ! is_valid_repo_name "$new_repo_name"; then
+    echo "Invalid repository name. Repository names can only contain alphanumeric characters, hyphens, and underscores, and must be less than 100 characters long."
+    exit 1
+fi
+
+# Check if the directory is a git repository
+if git rev-parse --git-dir > /dev/null 2>&1; then
+    echo "Git repository found."
+else
+    echo "The current directory is not a git repository."
+    exit 1
+fi
+
+# Check if the repository exists on GitHub
+if gh repo view "$full_repo_name" >/dev/null 2>&1; then
+    # Rename the repository on GitHub using the API
+    response=$(curl -s -o /dev/null -w "%{http_code}" -X PATCH -H "Authorization: token $(gh auth token)" \
+        -d "{\"name\":\"$new_repo_name\"}" \
+        "https://api.github.com/repos/$github_username/$current_repo_name")
+
+    if [ "$response" -eq 200 ]; then
+        echo "✓ Renamed repository from $current_repo_name to $new_repo_name on GitHub"
+
+        # Update the repo-name file with the new repository name
+        echo "$github_username/$new_repo_name" > .sgt/repo-name
+        echo "✓ Updated repo-name file with the new repository name"
+
+        # Update the remote URL in the local git repository
+        git remote set-url origin "git@github.com:$github_username/$new_repo_name.git"
+        echo "✓ Updated the remote URL in the local git repository to git@github.com:$github_username/$new_repo_name.git"
+    else
+        echo "Failed to rename the repository on GitHub. HTTP status code: $response"
+        exit 1
+    fi
+else
+    echo "Repository $full_repo_name does not exist on GitHub."
+    exit 1
+fi

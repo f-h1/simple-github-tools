@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Read from stdin
+while read -r path; do
+  # Check if .sgt directory exists
+  if [[ -d "$path/.sgt" ]]; then
+    # Check if repo-name file exists inside the .sgt directory
+    if [[ -f "$path/.sgt/repo-name" ]]; then
+      # Read the content of repo-name file
+      repo_info=$(cat "$path/.sgt/repo-name")
+      # Form the git clone command
+      echo "git clone git@github.com:$repo_info.git"
+    else
+      echo "No 'repo-name' file found in $path/.sgt"
+    fi
+  else
+    echo "No '.sgt' directory found in $path"
+  fi
+done
+

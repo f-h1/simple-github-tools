@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Check out to a temporary branch
+git checkout --orphan new-start
+# Add all files
+git add -A
+# Commit the current state of the files as a new initial commit
+git commit -m "New initial commit"
+# Delete the old master branch locally
+git branch -D master
+# Rename the current branch to master
+git branch -m master
+# Forcefully update the master branch on the remote repository
+git push -u origin master --force

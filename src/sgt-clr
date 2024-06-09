@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Function to process a single directory
+process_directory() {
+    local project_path="$1"
+    echo "Processing $project_path"
+    cd "$project_path" || { echo "Failed to enter $project_path"; return; }  # Skip to next if this fails
+    
+    # Check if it's a valid Git repository
+    if git rev-parse --git-dir > /dev/null 2>&1; then
+        # Make sure .gitignore exists for the repo, even if empty
+        touch .gitignore
+
+        # First update the repository to respect changes in .gitignore
+        git add .gitignore
+        git commit -m "Ensure .gitignore is present and updated" --allow-empty
+
+        # Remove files that are now ignored but were previously tracked
+        git ls-files --cached --ignored --exclude-standard -z | xargs -0 git rm --cached
+        
+        # Commit the changes if there are any
+        if git diff-index --quiet HEAD --; then
+            echo "No changes to commit in $project_path"
+        else
+            git commit -am "Update .gitignore and clean cache"
+            echo "Committed changes to $project_path"
+        
+            # Push the changes to the remote repository to ensure they reflect on the server
+            git push origin master
+            echo "Pushed changes to remote"
+        fi
+    else
+        echo "$project_path is not a git repository"
+    fi
+}
+
+# Check if input is being piped
+if [ ! -t 0 ]; then
+    # Read directories from stdin
+    while IFS= read -r project_path; do
+        process_directory "$project_path"
+    done
+elif [ -n "$1" ]; then
+    # Process the single directory provided as an argument
+    process_directory "$1"
+else
+    # No arguments provided, process the current working directory
+    process_directory "$(pwd)"
+fi

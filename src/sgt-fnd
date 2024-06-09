@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Function to process a single directory
+process_directory() {
+    local dir="$1"
+    # Ensure the directory is an absolute path
+    dir=$(realpath "$dir")
+    # Find directories containing 'repo-name' and print absolute paths
+    find "$dir" -type d -name '.sgt' -exec dirname {} \; | while read line; do realpath "$line"; done
+}
+
+# Check if input is being piped
+if [ ! -t 0 ]; then
+    # Read directories from stdin
+    while IFS= read -r dir; do
+        process_directory "$dir"
+    done
+elif [ -n "$1" ]; then
+    # Process the single directory provided as an argument
+    process_directory "$1"
+else
+    # No arguments provided, process the current working directory
+    process_directory "$(pwd)"
+fi

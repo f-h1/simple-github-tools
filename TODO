@@ -1,0 +1,45 @@
+Stash,
+
+
+
+If you want to discard all changes in your entire project, using git restore is a great choice, but you'll need to slightly adjust the command syntax to ensure it works properly. The correct command to discard all uncommitted changes (both staged and unstaged) in your working directory would be:
+
+bash
+Copy code
+git restore --source=HEAD --staged --worktree .
+Here’s what each part of the command does:
+
+--source=HEAD: This specifies that you want to restore the files to their state in HEAD, which is the last committed state of your current branch.
+--staged: This option tells Git to restore the staged snapshot to match the version in HEAD.
+--worktree: This tells Git to restore the working directory files to match the version in HEAD.
+.: This targets all files in the current directory and subdirectories.
+Simplified Commands
+Alternatively, you can use a more straightforward command if you don't need to specify between staged and unstaged changes:
+
+bash
+Copy code
+git restore .
+This command will discard changes to tracked files in your working directory. If you also need to unstage any changes (i.e., remove changes from the index/staging area), you can combine it with:
+
+bash
+Copy code
+git restore --staged .
+Other Useful Commands for Discarding Changes
+Discard All Uncommitted Changes (including untracked files):
+If you also have untracked files that you want to remove, you can use git clean in addition to git restore. Be careful with this command, as it will permanently delete untracked files:
+
+bash
+Copy code
+git clean -fd
+Here, -f stands for "force" and -d means "remove directories".
+
+Resetting the Repository:
+If you want to reset the state of your repository to the last commit and discard all changes (both staged and unstaged), you can use:
+
+bash
+Copy code
+git reset --hard HEAD
+This command resets the current HEAD to the last commit and updates both the index (staging area) and the working tree.
+
+Note
+These commands are powerful and can lead to loss of your work if used improperly. It's always good practice to make sure you really want to discard these changes, as these actions are not easily reversible.

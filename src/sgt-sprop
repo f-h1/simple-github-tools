@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Path to the file containing paths to the parent repositories
+REPO_PARENTS_FILE=".sgt/repo-parents"
+
+# Check if the file exists
+if [ ! -f "$REPO_PARENTS_FILE" ]; then
+    echo "Error: File $REPO_PARENTS_FILE does not exist."
+    exit 1
+fi
+
+# Loop through each line in the file
+while IFS= read -r parent_path
+do
+    # Check if the path is a valid directory
+    if [ ! -d "$parent_path" ]; then
+        echo "Warning: Directory $parent_path does not exist. Skipping."
+        continue
+    fi
+
+    echo "Updating submodules for repository located at $parent_path"
+
+    # Navigate to the parent repository
+    cd "$parent_path"
+
+    # Initialize and update submodules to their latest remote HEAD
+    git submodule update --init --recursive
+    git submodule foreach 'branch=$(git branch --show-current); git pull origin $branch'
+
+    # Pull the latest changes for each submodule and update the main project to point to them
+    git add .
+
+    # Commit the update
+    git commit -m "Updated submodules to latest commit"
+
+    # Push the changes
+    git push
+
+    # Return to the original directory (optional, depends on the environment setup)
+    cd -
+
+done < "$REPO_PARENTS_FILE"
+
+echo "Submodule updates complete."

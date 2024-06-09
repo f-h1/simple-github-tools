@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Ensure the necessary GitHub authentication token scope is set
+gh auth refresh -h github.com -s delete_repo
+
+# Function to process a single directory
+process_directory() {
+    local project_path="$1"
+    echo "Processing $project_path"
+    cd "$project_path" || { echo "Failed to enter $project_path"; return; }  # Skip to next if this fails
+
+    # Retrieve the repository name from the repo-name file
+    if [ -f .sgt/repo-name ]; then
+        repo_name=$(<.sgt/repo-name)
+        repo_name=${repo_name// /-} # Replace spaces with hyphens
+    else
+        echo "No repo-name file found in $project_path, skipping..."
+        return
+    fi
+
+    # Check if the directory is a git repository
+    if git rev-parse --git-dir > /dev/null 2>&1; then
+        echo "Git repository found."
+    else
+        echo "$project_path is not a git repository, skipping..."
+        return
+    fi
+
+    # Check if the repository exists on GitHub
+    if gh repo view "$repo_name" >/dev/null 2>&1; then
+        # Delete the repository from GitHub
+        gh repo delete "$repo_name" --yes
+        echo "✓ Deleted repository $repo_name from GitHub"
+    else
+        echo "Repository $repo_name does not exist on GitHub, skipping..."
+    fi
+}
+
+# Check if input is being piped
+if [ ! -t 0 ]; then
+    # Read directories from stdin
+    while IFS= read -r project_path; do
+        process_directory "$project_path"
+    done
+elif [ -n "$1" ]; then
+    # Process the single directory provided as an argument
+    process_directory "$1"
+else
+    # No arguments provided, process the current working directory
+    process_directory "$(pwd)"
+fi

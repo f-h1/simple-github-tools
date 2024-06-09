@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Script to add a submodule and log the operation
+
+# Check for correct number of arguments
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <Submodule SSH URL> <Path to Submodule> <Submodule Name>"
+    exit 1
+fi
+
+# Assign arguments to variables
+SUBMODULE_URL=$1
+SUBMODULE_PATH=$2
+SUBMODULE_NAME=$3
+
+# Add submodule using SSH URL
+git submodule add $SUBMODULE_URL $SUBMODULE_PATH
+if [ $? -ne 0 ]; then
+    echo "Failed to add submodule. Please check the details and try again."
+    exit 1
+fi
+
+# Log the addition to sgt-hist
+DATE_TIME=$(date "+%Y-%m-%d %H:%M:%S")
+LOG_ENTRY="$DATE_TIME: Added submodule '$SUBMODULE_NAME' at path '$SUBMODULE_PATH' from URL '$SUBMODULE_URL'"
+
+# Ensure sgt-hist file exists or create it
+touch .sgt/sgt-hist
+
+# Append the log entry
+echo "$LOG_ENTRY" >> .sgt/sgt-hist
+
+# Confirmation and completion message
+echo "Submodule '$SUBMODULE_NAME' added successfully and logged in 'sgt-hist'."
