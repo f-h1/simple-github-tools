@@ -252,6 +252,7 @@ sgt-upd -m "My commit message here"
 
 **Warning! Good way to potentially mess up your git.**
 
+
 **Of the different clear potions** this is better for solving situations you don't bother understanding, but be prepared messing it all up and having to delete and recreate your repo using the clear commands.
 
 **This one fixes the mess created by sgt-dloc**
@@ -260,6 +261,7 @@ sgt-upd -m "My commit message here"
 
 The sgt-reset script resets a Git repository by deleting .git, reinitializing, and setting a new remote.
 
+Will delete our commit history.
 
 Warning: will clear commit history as stoerd remotely among other things.
 
@@ -277,7 +279,18 @@ hint: its remote counterpart. If you want to integrate the remote changes,
 hint: use 'git pull' before pushing again.
 hint: See the 'Note about fast-forwards' in 'git push --help' for details.
 ```
+I and it solves
 
+```
+ ! [rejected]        master -> master (fetch first)
+error: failed to push some refs to 'github.com:f-h1/nwstat-for-conky.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. This is usually caused by another repository pushing to
+hint: the same ref. If you want to integrate the remote changes, use
+hint: 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+```
 
 
 
