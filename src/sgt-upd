@@ -5,7 +5,7 @@ process_directory() {
     local project_path="$1"
     local commit_message="$2"  # This might be empty if no message was provided
 
-    echo "Processing $project_path"
+    echo -e "\033[93mProcessing $project_path\033[0m"
     cd "$project_path" || { echo "Failed to enter $project_path"; return; }  # Skip to next if this fails
     
     # Retrieve the repository name from the repo-name file
