@@ -3,11 +3,21 @@
 # Function to process a single directory
 process_directory() {
     local project_path="$1"
-    local commit_message="$2"  # This might be empty if no message was provided
+    local commit_message="$2" # This might be empty if no message was provided
+
+    # Reset all variables
+    local repo_name=""
+    local topics=""
+    local description=""
+    local website=""
+    local visibility="private" # Default to private
 
     echo -e "\033[93mProcessing $project_path\033[0m"
-    cd "$project_path" || { echo "Failed to enter $project_path"; return; }  # Skip to next if this fails
-    
+    cd "$project_path" || {
+        echo "Failed to enter $project_path"
+        return
+    } # Skip to next if this fails
+
     # Retrieve the repository name from the repo-name file
     if [ -f .sgt/repo-name ]; then
         repo_name=$(<.sgt/repo-name)
@@ -25,7 +35,7 @@ process_directory() {
     [ -f .sgt/repo-visibility ] && visibility=$(<.sgt/repo-visibility)
 
     # Initialize Git repository if not already a Git repo
-    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
         echo "$project_path is not a git repository. Initializing..."
         git init
     fi
@@ -45,7 +55,7 @@ process_directory() {
     fi
 
     # Add remote origin only if not existing
-    if ! git remote get-url origin > /dev/null 2>&1; then
+    if ! git remote get-url origin >/dev/null 2>&1; then
         git remote add origin git@github.com:$repo_name.git && echo "Successfully added remote origin"
     fi
 
@@ -56,7 +66,7 @@ process_directory() {
     if ! git diff-index --quiet HEAD --; then
         if [ -n "$commit_message" ]; then
             local full_commit_message="$commit_message | utc $(date -u +"%Y-%m-%d %H:%M")"
-            echo "$full_commit_message" >> changelog.md
+            echo "$full_commit_message" >>changelog.md
             git commit -m "$full_commit_message"
         else
             git commit -m "Auto-commit on $(date -u +"%Y-%m-%d %H:%M")"
@@ -74,23 +84,23 @@ process_directory() {
 # Parse command line arguments for a commit message
 commit_message=""
 while getopts ":m:" opt; do
-  case $opt in
+    case $opt in
     m)
-      commit_message=$OPTARG
-      ;;
+        commit_message=$OPTARG
+        ;;
     \?)
-      echo "Invalid option: -$OPTARG" >&2
-      exit 1
-      ;;
+        echo "Invalid option: -$OPTARG" >&2
+        exit 1
+        ;;
     :)
-      echo "Option -$OPTARG requires an argument." >&2
-      exit 1
-      ;;
-  esac
+        echo "Option -$OPTARG requires an argument." >&2
+        exit 1
+        ;;
+    esac
 done
 
 # Remove the options processed by getopts
-shift $((OPTIND -1))
+shift $((OPTIND - 1))
 
 # Check if input is being piped
 if [ ! -t 0 ]; then
