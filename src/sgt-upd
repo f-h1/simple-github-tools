@@ -50,6 +50,7 @@ process_directory() {
         echo "✓ Created repository $repo_name on GitHub"
     else
         echo "$repo_name already exists on GitHub, updating settings..."
+        echo "------->The topics: $topics"
         gh repo edit "$repo_name" --description "$description" --homepage "$website" --add-topic "$topics" --visibility "$visibility"
         echo "Updated repository settings for $repo_name on GitHub"
     fi
