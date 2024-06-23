@@ -296,7 +296,7 @@ I and it solves
 
 ```
  ! [rejected]        master -> master (fetch first)
-error: failed to push some refs to 'github.com:f-h1/nwstat-for-conky.git'
+error: failed to push some refs to 'github.com:username/reponame.git'
 hint: Updates were rejected because the remote contains work that you do not
 hint: have locally. This is usually caused by another repository pushing to
 hint: the same ref. If you want to integrate the remote changes, use
